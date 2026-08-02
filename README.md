@@ -185,6 +185,7 @@ Everything is set via environment variables (see [`.env.example`](.env.example))
 | `ROUTER_MODEL` | `llama-3.1-8b-instant` | Cheap/fast model for intent routing |
 | `APP_API_KEY` | *(empty)* | If set, `/api/chat` requires `X-API-Key` |
 | `RATE_LIMIT_PER_MINUTE` | `20` | Per-client sliding-window limit |
+| `TRUSTED_PROXIES` | *(empty)* | CIDRs/IPs whose `X-Forwarded-For` we trust for rate-limit keying. Empty = never trust XFF |
 | `MAX_AGENT_ITERATIONS` | `5` | Hard cap for the agentic loop |
 | `PORT` | `8080` | Listen port (Cloud Run sets this) |
 
