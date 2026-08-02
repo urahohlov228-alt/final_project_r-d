@@ -6,6 +6,7 @@ so it only receives requests nothing else claimed (i.e. /mcp).
 """
 
 import hmac
+import ipaddress
 import logging
 import time
 import uuid
@@ -27,6 +28,37 @@ from .ratelimit import RateLimiter
 logger = logging.getLogger(__name__)
 
 STATIC_DIR = PROJECT_ROOT / "static"
+
+
+def _parse_trusted_proxies(
+    raw: str,
+) -> list[ipaddress.IPv4Network | ipaddress.IPv6Network]:
+    """Parse a comma-separated list of IPs/CIDRs into network objects.
+    Bare IPs are treated as /32 (v4) or /128 (v6). Invalid entries are skipped
+    with a warning so a typo doesn't lock everyone out."""
+    networks: list[ipaddress.IPv4Network | ipaddress.IPv6Network] = []
+    for entry in raw.split(","):
+        entry = entry.strip()
+        if not entry:
+            continue
+        try:
+            networks.append(ipaddress.ip_network(entry, strict=False))
+        except ValueError:
+            logger.warning("ignoring invalid TRUSTED_PROXIES entry: %r", entry)
+    return networks
+
+
+def _is_trusted(
+    ip_str: str,
+    networks: list[ipaddress.IPv4Network | ipaddress.IPv6Network],
+) -> bool:
+    if not networks:
+        return False
+    try:
+        ip = ipaddress.ip_address(ip_str)
+    except ValueError:
+        return False
+    return any(ip in net for net in networks)
 
 
 class ChatRequest(BaseModel):
@@ -70,6 +102,7 @@ def create_app(
     orchestrator = Orchestrator(llm, toolbox, memory, settings)
     metrics = Metrics()
     limiter = RateLimiter(settings.rate_limit_per_minute)
+    trusted_proxies = _parse_trusted_proxies(settings.trusted_proxies)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -111,10 +144,16 @@ def create_app(
         return _client_id(request)
 
     def _client_id(request: Request) -> str:
-        forwarded = request.headers.get("x-forwarded-for")
-        if forwarded:
-            return forwarded.split(",")[0].strip()
-        return request.client.host if request.client else "unknown"
+        # Only honour X-Forwarded-For when the direct hop is an allowlisted
+        # proxy; otherwise an attacker could set the header themselves and
+        # rotate rate-limit keys freely.
+        direct_ip = request.client.host if request.client else ""
+        if direct_ip and _is_trusted(direct_ip, trusted_proxies):
+            forwarded = request.headers.get("x-forwarded-for", "")
+            if forwarded:
+                # Leftmost entry is the original client IP inserted by the LB.
+                return forwarded.split(",")[0].strip() or direct_ip
+        return direct_ip or "unknown"
 
     # ---------------------------------------------------------------- routes
     @app.get("/", include_in_schema=False)
@@ -123,21 +162,25 @@ def create_app(
 
     @app.get("/health")
     async def health():
+        # Exception details stay in logs; the response only reports up/down
+        # so a public /health can't leak file paths or dependency internals.
         checks: dict = {"llm_configured": settings.llm_enabled}
         try:
             from ..rag.store import VectorStore
 
             store = VectorStore(str(settings.chroma_dir), settings.rag_collection)
             checks["index_chunks"] = store.count()
-        except Exception as exc:  # noqa: BLE001
-            checks["index_chunks"] = f"error: {exc}"
+        except Exception:
+            logger.exception("health check: vector store unavailable")
+            checks["index_chunks"] = "error"
         try:
             from ..db import EmployeeDB
 
             departments = EmployeeDB(settings.db_path).departments()
             checks["employees"] = sum(d["headcount"] for d in departments)
-        except Exception as exc:  # noqa: BLE001
-            checks["employees"] = f"error: {exc}"
+        except Exception:
+            logger.exception("health check: employee DB unavailable")
+            checks["employees"] = "error"
         ok = settings.llm_enabled and isinstance(checks["index_chunks"], int)
         return {"status": "ok" if ok else "degraded", "version": app.version, "checks": checks}
 

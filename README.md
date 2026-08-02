@@ -185,6 +185,7 @@ Everything is set via environment variables (see [`.env.example`](.env.example))
 | `ROUTER_MODEL` | `llama-3.1-8b-instant` | Cheap/fast model for intent routing |
 | `APP_API_KEY` | *(empty)* | If set, `/api/chat` requires `X-API-Key` |
 | `RATE_LIMIT_PER_MINUTE` | `20` | Per-client sliding-window limit |
+| `TRUSTED_PROXIES` | *(empty)* | CIDRs/IPs whose `X-Forwarded-For` we trust for rate-limit keying. Empty = never trust XFF |
 | `MAX_AGENT_ITERATIONS` | `5` | Hard cap for the agentic loop |
 | `PORT` | `8080` | Listen port (Cloud Run sets this) |
 
@@ -207,6 +208,16 @@ gcloud run deploy hr-assistant \
   --source . --region europe-west1 --allow-unauthenticated \
   --memory 1Gi --set-env-vars "LLM_API_KEY=gsk_...,APP_API_KEY=choose-a-secret"
 ```
+
+> **Секрети на проді.** `--set-env-vars` кладе значення у revision-конфіг Cloud Run — його видно в UI й історії. На проді краще Secret Manager:
+> ```bash
+> printf 'gsk_...'        | gcloud secrets create groq-api-key   --data-file=-
+> printf 'choose-a-secret' | gcloud secrets create hr-app-api-key --data-file=-
+> gcloud run services update hr-assistant \
+>   --update-secrets=LLM_API_KEY=groq-api-key:latest,APP_API_KEY=hr-app-api-key:latest
+> ```
+> Runtime service account потребує `roles/secretmanager.secretAccessor` тільки на ці секрети.
+> **`APP_API_KEY` має бути заданим на проді** — якщо порожній, `/api/chat` відкритий без авторизації.
 
 Continuous deployment via [GitHub Actions](.github/workflows/deploy.yml):
 

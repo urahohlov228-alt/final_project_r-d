@@ -48,6 +48,10 @@ class Settings(BaseSettings):
     app_api_key: str = ""  # empty => auth disabled (local dev)
     rate_limit_per_minute: int = 20
     max_message_chars: int = 2000
+    # Comma-separated CIDRs / IPs of upstream proxies whose X-Forwarded-For
+    # we're allowed to trust (e.g. "35.191.0.0/16,130.211.0.0/22" for GCLB).
+    # Empty (default) = never trust XFF, always use the direct connection IP.
+    trusted_proxies: str = ""
 
     # --- external APIs ---
     holidays_api_base: str = "https://date.nager.at/api/v3"

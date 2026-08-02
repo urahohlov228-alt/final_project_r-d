@@ -85,6 +85,20 @@ async def test_llm_not_configured_returns_503(settings, seeded_db, fake_store, m
         assert response.status_code == 503
 
 
+def test_trusted_proxies_parsing_and_matching():
+    from hr_assistant.api.app import _is_trusted, _parse_trusted_proxies
+
+    nets = _parse_trusted_proxies("35.191.0.0/16, 10.0.0.5 ,not-an-ip, ")
+    assert len(nets) == 2  # invalid entry skipped
+    assert _is_trusted("35.191.12.34", nets) is True
+    assert _is_trusted("10.0.0.5", nets) is True
+    assert _is_trusted("10.0.0.6", nets) is False
+    assert _is_trusted("1.2.3.4", nets) is False
+    assert _is_trusted("not-an-ip", nets) is False
+    # empty allowlist => nothing is trusted
+    assert _is_trusted("35.191.12.34", _parse_trusted_proxies("")) is False
+
+
 async def test_validation_rejects_bad_payloads(settings, seeded_db, fake_store, mcp_server):
     app = create_app(settings, llm=FakeLLM([]), toolbox=MCPToolbox(mcp_server))
     async with app.router.lifespan_context(app), api_client(app) as client:
