@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HR Assistant</title>
+<style>
+  :root {
+    --bg: #0e1117; --panel: #161b26; --panel-2: #1d2433; --border: #2a3347;
+    --text: #e6e9f0; --muted: #8b94a7; --accent: #6c7cff; --accent-2: #4553d6;
+    --green: #34c98e; --amber: #e8b34b; --red: #e06c75;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg); color: var(--text); height: 100dvh;
+    display: flex; flex-direction: column;
+  }
+  header {
+    display: flex; align-items: center; gap: 12px; padding: 12px 20px;
+    background: var(--panel); border-bottom: 1px solid var(--border);
+  }
+  .logo { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, var(--accent), #9b6cff);
+    display: grid; place-items: center; font-weight: 700; font-size: 15px; color: #fff; }
+  .title { font-weight: 650; }
+  .subtitle { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .dot.ok { background: var(--green); } .dot.bad { background: var(--red); }
+  header .spacer { flex: 1; }
+  button.ghost {
+    background: transparent; color: var(--muted); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 12px; font-size: 13px; cursor: pointer;
+  }
+  button.ghost:hover { color: var(--text); border-color: var(--accent); }
+
+  main { flex: 1; overflow-y: auto; scroll-behavior: smooth; }
+  .thread { max-width: 780px; margin: 0 auto; padding: 24px 16px 12px; display: flex; flex-direction: column; gap: 14px; }
+
+  .msg { display: flex; flex-direction: column; max-width: 86%; }
+  .msg.user { align-self: flex-end; align-items: flex-end; }
+  .msg.bot  { align-self: flex-start; }
+  .bubble { padding: 11px 15px; border-radius: 14px; white-space: normal; word-wrap: break-word; }
+  .msg.user .bubble { background: var(--accent-2); color: #fff; border-bottom-right-radius: 4px; }
+  .msg.bot  .bubble { background: var(--panel-2); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .bubble p { margin: 0 0 8px; } .bubble p:last-child { margin: 0; }
+  .bubble ul { margin: 4px 0 8px; padding-left: 20px; }
+  .bubble code { background: #0b0e14; border: 1px solid var(--border); border-radius: 5px; padding: 1px 5px; font-size: 13px; }
+  .bubble a { color: var(--accent); }
+
+  .meta { display: flex; align-items: center; gap: 8px; margin: 6px 4px 0; font-size: 11.5px; color: var(--muted); flex-wrap: wrap; }
+  .badge { padding: 2px 9px; border-radius: 20px; font-weight: 600; font-size: 11px; letter-spacing: .2px; }
+  .badge.knowledge { background: rgba(108,124,255,.16); color: #a3aeff; }
+  .badge.employee  { background: rgba(52,201,142,.14); color: #6fe0b2; }
+  .badge.info      { background: rgba(232,179,75,.15); color: #ecc06d; }
+  .badge.off_topic { background: rgba(139,148,167,.15); color: var(--muted); }
+  .badge.blocked   { background: rgba(224,108,117,.15); color: var(--red); }
+
+  details.sources { margin-top: 8px; font-size: 13px; }
+  details.sources summary { cursor: pointer; color: var(--accent); font-size: 12.5px; user-select: none; }
+  .source { margin-top: 8px; padding: 9px 12px; background: #131826; border: 1px solid var(--border); border-radius: 9px; }
+  .source .path { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .source .snippet { font-size: 12.5px; color: #b9c0d0; }
+
+  .typing { display: inline-flex; gap: 5px; padding: 14px 16px; }
+  .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay: .2s; } .typing i:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%, 70%, 100% { opacity: .25 } 35% { opacity: 1 } }
+
+  .composer { padding: 12px 16px 18px; background: linear-gradient(transparent, var(--bg) 30%); }
+  .composer-inner {
+    max-width: 780px; margin: 0 auto; display: flex; gap: 10px; align-items: flex-end;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 10px 12px;
+  }
+  .composer-inner:focus-within { border-color: var(--accent); }
+  textarea {
+    flex: 1; resize: none; border: 0; outline: 0; background: transparent; color: var(--text);
+    font: inherit; max-height: 140px; padding: 4px 2px;
+  }
+  #send {
+    background: var(--accent); color: #fff; border: 0; border-radius: 10px;
+    width: 38px; height: 38px; cursor: pointer; font-size: 17px; flex: 0 0 auto;
+  }
+  #send:disabled { opacity: .45; cursor: default; }
+  .hint { max-width: 780px; margin: 8px auto 0; font-size: 11.5px; color: var(--muted); text-align: center; }
+
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+  .chip { font-size: 12.5px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border);
+    padding: 7px 13px; border-radius: 20px; cursor: pointer; }
+  .chip:hover { border-color: var(--accent); }
+  .welcome { text-align: center; color: var(--muted); padding: 48px 16px 8px; }
+  .welcome h2 { color: var(--text); font-size: 20px; margin-bottom: 6px; }
+
+  dialog { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 12px; padding: 20px; width: min(420px, 90vw); }
+  dialog::backdrop { background: rgba(0,0,0,.55); }
+  dialog input { width: 100%; margin: 10px 0 14px; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font: inherit; }
+  .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #2b1e22; color: #f2b8bd;
+    border: 1px solid #5c3138; padding: 10px 16px; border-radius: 10px; font-size: 13.5px; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="logo">HR</div>
+    <div>
+      <div class="title">HR Assistant</div>
+      <div class="subtitle"><span class="dot" id="statusDot"></span><span id="statusText">connecting…</span></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="ghost" id="keyBtn" hidden>API key</button>
+    <button class="ghost" id="newChat">New chat</button>
+  </header>
+
+  <main><div class="thread" id="thread">
+    <div class="welcome" id="welcome">
+      <h2>How can I help you today?</h2>
+      <div>Company policies · employee directory · time off · holidays · FX rates</div>
+      <div class="chips">
+        <button class="chip">How much paid time off can I take per year?</button>
+        <button class="chip">What team is Olivia Smith on?</button>
+        <button class="chip">How many vacation days does Henry Thomas have left?</button>
+        <button class="chip">Public holidays in Ukraine in 2026</button>
+        <button class="chip">What is the USD to UAH exchange rate?</button>
+      </div>
+    </div>
+  </div></main>
+
+  <div class="composer">
+    <div class="composer-inner">
+      <textarea id="input" rows="1" placeholder="Ask about policies, people, time off…"></textarea>
+      <button id="send" title="Send">➤</button>
+    </div>
+    <div class="hint">Multi-agent MCP demo — routes: <b>Knowledge</b> (RAG) · <b>Employee</b> (SQL) · <b>Info</b> (external APIs)</div>
+  </div>
+
+  <dialog id="keyDialog">
+    <b>Application API key</b>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px">This server requires the <code>X-API-Key</code> header.</div>
+    <input id="keyInput" type="password" placeholder="paste key…">
+    <button class="ghost" id="keySave">Save</button>
+  </dialog>
+  <div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const thread = $("thread"), input = $("input"), sendBtn = $("send");
+let sessionId = localStorage.getItem("hr_session") || crypto.randomUUID().replaceAll("-", "");
+localStorage.setItem("hr_session", sessionId);
+let apiKey = localStorage.getItem("hr_api_key") || "";
+let busy = false;
+
+const AGENT_LABEL = { knowledge: "Knowledge Agent", employee: "Employee Agent", info: "Info Agent", off_topic: "Router", blocked: "Guardrails" };
+
+function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function mdLite(text) {
+  const lines = esc(text).split("\n");
+  let html = "", inList = false;
+  for (const line of lines) {
+    const li = line.match(/^\s*[-*•]\s+(.*)/);
+    if (li) { if (!inList) { html += "<ul>"; inList = true; } html += "<li>" + inline(li[1]) + "</li>"; continue; }
+    if (inList) { html += "</ul>"; inList = false; }
+    if (line.trim()) html += "<p>" + inline(line) + "</p>";
+  }
+  if (inList) html += "</ul>";
+  return html;
+}
+function inline(s) {
+  return s
+    .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\[source:([^\]]+)\]/g, '<code style="font-size:11.5px">source:$1</code>');
+}
+
+function addUser(text) {
+  $("welcome")?.remove();
+  const el = document.createElement("div");
+  el.className = "msg user";
+  el.innerHTML = `<div class="bubble">${esc(text)}</div>`;
+  thread.appendChild(el); scroll();
+}
+function addTyping() {
+  const el = document.createElement("div");
+  el.className = "msg bot"; el.id = "typing";
+  el.innerHTML = `<div class="bubble typing"><i></i><i></i><i></i></div>`;
+  thread.appendChild(el); scroll();
+}
+function addBot(data) {
+  $("typing")?.remove();
+  const el = document.createElement("div");
+  el.className = "msg bot";
+  const badgeClass = data.blocked ? "blocked" : (data.route || "knowledge");
+  const label = data.agent || AGENT_LABEL[badgeClass] || "Assistant";
+  let sources = "";
+  if (data.sources && data.sources.length) {
+    const items = data.sources.map(s =>
+      `<div class="source"><div class="path">📄 ${esc(s.source)} — ${esc(s.section || s.title || "")} · score ${(s.score ?? 0).toFixed(2)}</div>
+       <div class="snippet">${esc(s.snippet || "")}</div></div>`).join("");
+    sources = `<details class="sources"><summary>Sources (${data.sources.length})</summary>${items}</details>`;
+  }
+  const toolsUsed = (data.tool_calls || []).map(t => t.tool).join(", ");
+  const usage = data.usage ? ` · ${data.usage.llm_calls} LLM calls · ${(data.usage.prompt_tokens||0)+(data.usage.completion_tokens||0)} tok` : "";
+  el.innerHTML = `
+    <div class="bubble">${mdLite(data.reply || "")}${sources}</div>
+    <div class="meta"><span class="badge ${badgeClass}">${esc(label)}</span>
+      ${toolsUsed ? `<span>🔧 ${esc(toolsUsed)}</span>` : ""}
+      <span>${data.elapsed_ms} ms${usage}</span></div>`;
+  thread.appendChild(el); scroll();
+}
+function scroll() { document.querySelector("main").scrollTo({ top: 1e9 }); }
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3500); }
+
+async function send() {
+  const text = input.value.trim();
+  if (!text || busy) return;
+  busy = true; sendBtn.disabled = true; input.value = ""; autoresize();
+  addUser(text); addTyping();
+  try {
+    const headers = { "Content-Type": "application/json" };
+    if (apiKey) headers["X-API-Key"] = apiKey;
+    const res = await fetch("/api/chat", {
+      method: "POST", headers,
+      body: JSON.stringify({ message: text, session_id: sessionId }),
+    });
+    if (!res.ok) {
+      const detail = (await res.json().catch(() => ({}))).detail || res.statusText;
+      $("typing")?.remove();
+      if (res.status === 401) { $("keyDialog").showModal(); }
+      toast(`Error ${res.status}: ${detail}`);
+      busy = false; sendBtn.disabled = false;
+      return;
+    }
+    addBot(await res.json());
+  } catch (err) {
+    $("typing")?.remove();
+    toast("Network error: " + err.message);
+  }
+  busy = false; sendBtn.disabled = false; input.focus();
+}
+
+function autoresize() { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 140) + "px"; }
+input.addEventListener("input", autoresize);
+input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
+sendBtn.addEventListener("click", send);
+document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { input.value = c.textContent; send(); }));
+$("newChat").addEventListener("click", () => {
+  sessionId = crypto.randomUUID().replaceAll("-", "");
+  localStorage.setItem("hr_session", sessionId);
+  thread.innerHTML = ""; location.reload();
+});
+$("keyBtn").addEventListener("click", () => $("keyDialog").showModal());
+$("keySave").addEventListener("click", () => {
+  apiKey = $("keyInput").value.trim();
+  localStorage.setItem("hr_api_key", apiKey);
+  $("keyDialog").close(); toast("API key saved");
+});
+
+async function boot() {
+  try {
+    const cfg = await (await fetch("/api/config")).json();
+    if (cfg.auth_required) $("keyBtn").hidden = false;
+    const health = await (await fetch("/health")).json();
+    const ok = health.status === "ok";
+    $("statusDot").className = "dot " + (ok ? "ok" : "bad");
+    $("statusText").textContent = ok
+      ? `online · ${cfg.model}`
+      : (health.checks && health.checks.llm_configured === false ? "LLM key not configured" : "degraded");
+  } catch { $("statusDot").className = "dot bad"; $("statusText").textContent = "offline"; }
+}
+boot();
+</script>
+</body>
+</html>
