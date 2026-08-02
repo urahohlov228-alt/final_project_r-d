@@ -1,0 +1,54 @@
+# Deploys to Google Cloud Run.
+#
+# One-time setup (details in README → Deployment):
+#   1. Create a GCP project, enable Cloud Run + Cloud Build + Artifact Registry APIs.
+#   2. Create a service account with roles: Cloud Run Admin, Cloud Build Editor,
+#      Service Account User, Artifact Registry Writer; download its JSON key.
+#   3. GitHub repo → Settings → Secrets and variables → Actions:
+#        secrets:  GCP_SA_KEY (the JSON key), GCP_PROJECT_ID, GROQ_API_KEY,
+#                  APP_API_KEY (optional chat auth)
+#        variables: GCP_REGION (e.g. europe-west1), DEPLOY_ENABLED = "true"
+#
+# Runs manually (workflow_dispatch) or on every push to main once
+# the DEPLOY_ENABLED repository variable is set to "true".
+
+name: Deploy to Cloud Run
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Deploy (build from source via Cloud Build)
+        run: |
+          gcloud run deploy hr-assistant \
+            --source . \
+            --project "${{ secrets.GCP_PROJECT_ID }}" \
+            --region "${{ vars.GCP_REGION || 'europe-west1' }}" \
+            --allow-unauthenticated \
+            --memory 1Gi \
+            --cpu 1 \
+            --max-instances 2 \
+            --set-env-vars "LLM_API_KEY=${{ secrets.GROQ_API_KEY }},APP_API_KEY=${{ secrets.APP_API_KEY }},ENV=prod,LOG_LEVEL=INFO"
+
+      - name: Show service URL
+        run: |
+          gcloud run services describe hr-assistant \
+            --project "${{ secrets.GCP_PROJECT_ID }}" \
+            --region "${{ vars.GCP_REGION || 'europe-west1' }}" \
+            --format 'value(status.url)'
