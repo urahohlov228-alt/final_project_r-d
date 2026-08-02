@@ -1,0 +1,104 @@
+<mxfile host="app.diagrams.net" modified="2026-08-02T14:30:00.000Z" agent="hr-assistant" version="24.0.0">
+  <diagram id="hr-assistant-architecture" name="HR Assistant Architecture">
+    <mxGraphModel dx="1100" dy="760" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="HR Assistant — Multi-Agent MCP System with RAG" style="text;html=1;fontSize=18;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="300" y="20" width="560" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Clients -->
+        <mxCell id="clients" value="Clients" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="200" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="ui" value="Web Chat UI&#10;(static HTML/JS)&#10;route badges + sources" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="115" width="160" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="cd" value="Claude Desktop&#10;(any MCP host)&#10;via stdio" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="185" width="160" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- FastAPI container -->
+        <mxCell id="app" value="FastAPI container (single deployable unit)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="80" width="560" height="470" as="geometry" />
+        </mxCell>
+
+        <mxCell id="api" value="POST /api/chat  ·  /health  ·  /metrics&#10;X-API-Key auth · rate limit · JSON logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="330" y="115" width="500" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="guard" value="Input guardrails&#10;(injection patterns, length limits) — before any LLM call" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="330" y="180" width="500" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="router" value="Router Agent — llama-3.1-8b-instant&#10;intent → knowledge / employee / info / off_topic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="240" width="500" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ka" value="Knowledge Agent&#10;(70b)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="330" y="310" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="ea" value="Employee Agent&#10;(70b)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="505" y="310" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="ia" value="Info Agent&#10;(70b)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="680" y="310" width="150" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mem" value="Conversation memory (per session)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="330" y="380" width="250" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="out" value="Output guardrails (redaction, limits)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="595" y="380" width="235" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mcp" value="MCP Server  (/mcp streamable HTTP · stdio)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="430" width="500" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="t1" value="search_knowledge_base" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="345" y="465" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="t2" value="get_employee&#10;list_employees&#10;get_time_off_balance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="505" y="465" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="t3" value="get_public_holidays&#10;get_exchange_rate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="665" y="465" width="150" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Data sources -->
+        <mxCell id="data" value="Data sources" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="920" y="80" width="210" height="470" as="geometry" />
+        </mxCell>
+        <mxCell id="chroma" value="ChromaDB&#10;GitLab Handbook&#10;96 chunks · ONNX embeddings" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffffff;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="945" y="120" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="sqlite" value="SQLite&#10;1233 employees&#10;(IBM HR dataset)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffffff;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="945" y="240" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="ext" value="External REST APIs&#10;Nager.Date (holidays)&#10;open.er-api.com (FX)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="945" y="360" width="160" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Edges -->
+        <mxCell id="e1" style="endArrow=block;html=1;" edge="1" parent="1" source="ui" target="api"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e2" style="endArrow=block;html=1;dashed=1;startArrow=block;" edge="1" parent="1" source="cd" target="mcp"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e3" style="endArrow=block;html=1;" edge="1" parent="1" source="api" target="guard"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e4" style="endArrow=block;html=1;" edge="1" parent="1" source="guard" target="router"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e5" style="endArrow=block;html=1;" edge="1" parent="1" source="router" target="ka"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e6" style="endArrow=block;html=1;" edge="1" parent="1" source="router" target="ea"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e7" style="endArrow=block;html=1;" edge="1" parent="1" source="router" target="ia"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e8" style="endArrow=block;html=1;startArrow=block;dashed=1;" edge="1" parent="1" source="ka" target="mcp"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e9" style="endArrow=block;html=1;startArrow=block;dashed=1;" edge="1" parent="1" source="ea" target="mcp"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e10" style="endArrow=block;html=1;startArrow=block;dashed=1;" edge="1" parent="1" source="ia" target="mcp"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e11" style="endArrow=block;html=1;" edge="1" parent="1" source="t1" target="chroma"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e12" style="endArrow=block;html=1;" edge="1" parent="1" source="t2" target="sqlite"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e13" style="endArrow=block;html=1;" edge="1" parent="1" source="t3" target="ext"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="elabel" value="MCP protocol&#10;(tool discovery + calls)" style="text;html=1;fontSize=10;fontStyle=2;align=center;" vertex="1" parent="1">
+          <mxGeometry x="330" y="395" width="150" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
