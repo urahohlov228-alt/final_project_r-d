@@ -208,6 +208,16 @@ gcloud run deploy hr-assistant \
   --memory 1Gi --set-env-vars "LLM_API_KEY=gsk_...,APP_API_KEY=choose-a-secret"
 ```
 
+> **Секрети на проді.** `--set-env-vars` кладе значення у revision-конфіг Cloud Run — його видно в UI й історії. На проді краще Secret Manager:
+> ```bash
+> printf 'gsk_...'        | gcloud secrets create groq-api-key   --data-file=-
+> printf 'choose-a-secret' | gcloud secrets create hr-app-api-key --data-file=-
+> gcloud run services update hr-assistant \
+>   --update-secrets=LLM_API_KEY=groq-api-key:latest,APP_API_KEY=hr-app-api-key:latest
+> ```
+> Runtime service account потребує `roles/secretmanager.secretAccessor` тільки на ці секрети.
+> **`APP_API_KEY` має бути заданим на проді** — якщо порожній, `/api/chat` відкритий без авторизації.
+
 Continuous deployment via [GitHub Actions](.github/workflows/deploy.yml):
 
 1. Create a service account with roles **Cloud Run Admin**, **Cloud Build Editor**,

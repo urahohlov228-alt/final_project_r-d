@@ -123,21 +123,25 @@ def create_app(
 
     @app.get("/health")
     async def health():
+        # Exception details stay in logs; the response only reports up/down
+        # so a public /health can't leak file paths or dependency internals.
         checks: dict = {"llm_configured": settings.llm_enabled}
         try:
             from ..rag.store import VectorStore
 
             store = VectorStore(str(settings.chroma_dir), settings.rag_collection)
             checks["index_chunks"] = store.count()
-        except Exception as exc:  # noqa: BLE001
-            checks["index_chunks"] = f"error: {exc}"
+        except Exception:
+            logger.exception("health check: vector store unavailable")
+            checks["index_chunks"] = "error"
         try:
             from ..db import EmployeeDB
 
             departments = EmployeeDB(settings.db_path).departments()
             checks["employees"] = sum(d["headcount"] for d in departments)
-        except Exception as exc:  # noqa: BLE001
-            checks["employees"] = f"error: {exc}"
+        except Exception:
+            logger.exception("health check: employee DB unavailable")
+            checks["employees"] = "error"
         ok = settings.llm_enabled and isinstance(checks["index_chunks"], int)
         return {"status": "ok" if ok else "degraded", "version": app.version, "checks": checks}
 

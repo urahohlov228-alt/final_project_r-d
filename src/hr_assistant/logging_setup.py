@@ -37,6 +37,20 @@ def setup_logging(level: str = "INFO") -> None:
         logging.getLogger(name).setLevel(logging.WARNING)
 
 
+# Field names that must never appear in structured logs, even if a caller
+# passes them by mistake — Cloud Logging indexes everything.
+_REDACTED_FIELDS = frozenset(
+    {"authorization", "x-api-key", "x_api_key", "api_key", "apikey", "password", "secret", "token"}
+)
+
+
 def log_event(logger: logging.Logger, message: str, **fields) -> None:
-    """Log a message with structured extra fields (rendered into the JSON record)."""
-    logger.info(message, extra={"extra_fields": fields})
+    """Log a message with structured extra fields (rendered into the JSON record).
+
+    Values of sensitive-looking field names are replaced with '[redacted]' so
+    a slip-up in a caller can't leak a credential into Cloud Logging."""
+    safe = {
+        key: ("[redacted]" if key.lower() in _REDACTED_FIELDS else value)
+        for key, value in fields.items()
+    }
+    logger.info(message, extra={"extra_fields": safe})

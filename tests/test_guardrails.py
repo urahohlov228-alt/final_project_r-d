@@ -56,6 +56,19 @@ def test_output_redacts_secret_tokens():
     assert "[redacted]" in cleaned
 
 
+def test_output_redacts_bearer_and_pem_and_gcp_key():
+    text = (
+        "auth: Bearer abcdefghijklmnopqrstuvwxyz1234 "
+        '{"private_key": "-----BEGIN PRIVATE KEY-----\\nAAA\\n-----END PRIVATE KEY-----"} '
+        "-----BEGIN RSA PRIVATE KEY-----\nMIIB\n-----END RSA PRIVATE KEY-----"
+    )
+    cleaned = sanitize_output(text)
+    assert "Bearer abc" not in cleaned
+    assert "BEGIN PRIVATE KEY" not in cleaned
+    assert "BEGIN RSA PRIVATE KEY" not in cleaned
+    assert cleaned.count("[redacted]") >= 3
+
+
 def test_output_strips_control_chars_and_truncates():
     assert "\x07" not in sanitize_output("bell\x07char")
     assert len(sanitize_output("a" * 10_000)) <= 6001 + 1

@@ -102,7 +102,16 @@ def _match_injection(text: str) -> str | None:
 
 # Output redaction: secret-looking tokens must never reach the user,
 # no matter how they ended up in the reply.
-_SECRET_RE = re.compile(r"\b(?:sk|gsk|xoxb|ghp|glpat|AKIA)[-_][A-Za-z0-9_\-]{10,}\b")
+_SECRET_PATTERNS: list[re.Pattern] = [
+    # provider-prefixed API keys (OpenAI, Groq, Slack, GitHub, GitLab, AWS access key id)
+    re.compile(r"\b(?:sk|gsk|xoxb|xoxp|ghp|gho|ghu|ghs|ghr|glpat|AKIA|ASIA)[-_][A-Za-z0-9_\-]{10,}\b"),
+    # generic bearer tokens in Authorization-style prose
+    re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._\-]{20,}\b"),
+    # PEM private key blocks (RSA, EC, OPENSSH, generic)
+    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----", re.DOTALL),
+    # GCP service-account JSON "private_key" field
+    re.compile(r'"private_key"\s*:\s*"[^"]+"'),
+]
 _CONTROL_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 
 MAX_OUTPUT_CHARS = 6000
@@ -136,7 +145,8 @@ def check_input(text: str, max_chars: int = 2000) -> GuardrailVerdict:
 
 def sanitize_output(text: str) -> str:
     """Final pass over the assistant reply before it leaves the API."""
-    text = _SECRET_RE.sub("[redacted]", text)
+    for pattern in _SECRET_PATTERNS:
+        text = pattern.sub("[redacted]", text)
     text = _CONTROL_CHARS_RE.sub("", text)
     if len(text) > MAX_OUTPUT_CHARS:
         text = text[:MAX_OUTPUT_CHARS] + "…"
