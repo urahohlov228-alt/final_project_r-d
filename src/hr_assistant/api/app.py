@@ -14,9 +14,8 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
-
 from mcp.server.transport_security import TransportSecuritySettings
+from pydantic import BaseModel, Field
 
 from ..agents import ConversationMemory, MCPToolbox, OpenAICompatibleLLM, Orchestrator
 from ..config import PROJECT_ROOT, Settings, get_settings

@@ -77,7 +77,11 @@ class EmployeeDB:
                 f"SELECT {SAFE_FIELDS} FROM employees {where} ORDER BY name LIMIT ?",
                 [*params, limit],
             ).fetchall()
-        return {"total_matching": total, "returned": len(rows), "employees": [dict(r) for r in rows]}
+        return {
+            "total_matching": total,
+            "returned": len(rows),
+            "employees": [dict(r) for r in rows],
+        }
 
     def departments(self) -> list[dict]:
         with self._connect() as conn:

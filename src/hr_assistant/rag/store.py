@@ -5,6 +5,7 @@ embedding API and no GPU/torch dependency, which keeps the Docker image small
 and lets the whole RAG stack run for free.
 """
 
+import contextlib
 import logging
 
 import chromadb
@@ -15,25 +16,27 @@ logger = logging.getLogger(__name__)
 
 
 class VectorStore:
-    def __init__(self, persist_dir: str, collection_name: str):
+    def __init__(self, persist_dir: str, collection_name: str, embedding_function=None):
+        """embedding_function=None uses Chroma's default ONNX model; tests pass
+        a lightweight deterministic embedder to avoid the model download."""
         self._client = chromadb.PersistentClient(path=persist_dir)
         self._collection_name = collection_name
+        self._embedding_function = embedding_function
 
     @property
     def collection(self) -> chromadb.Collection:
-        return self._client.get_or_create_collection(
-            self._collection_name, metadata={"hnsw:space": "cosine"}
-        )
+        kwargs: dict = {"metadata": {"hnsw:space": "cosine"}}
+        if self._embedding_function is not None:
+            kwargs["embedding_function"] = self._embedding_function
+        return self._client.get_or_create_collection(self._collection_name, **kwargs)
 
     def count(self) -> int:
         return self.collection.count()
 
     def rebuild(self, chunks: list[Chunk], batch_size: int = 64) -> int:
         """Drop and re-create the collection from the given chunks."""
-        try:
+        with contextlib.suppress(Exception):  # collection may not exist yet
             self._client.delete_collection(self._collection_name)
-        except Exception:  # noqa: BLE001 - collection may not exist yet
-            pass
         collection = self.collection
         for start in range(0, len(chunks), batch_size):
             batch = chunks[start : start + batch_size]

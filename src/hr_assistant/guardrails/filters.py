@@ -16,7 +16,10 @@ INJECTION_PATTERNS: list[tuple[str, str]] = [
     (r"disregard\s+(all\s+|the\s+)?(previous|prior|above)", "instruction override"),
     (r"forget\s+(all\s+|everything|your\s+instructions)", "instruction override"),
     (r"reveal\s+(your\s+)?(system\s+)?prompt", "prompt extraction"),
-    (r"(show|print|repeat)\s+(me\s+)?(your\s+)?(system\s+prompt|instructions)", "prompt extraction"),
+    (
+        r"(show|print|repeat)\s+(me\s+)?(your\s+)?(system\s+prompt|instructions)",
+        "prompt extraction",
+    ),
     (r"you\s+are\s+now\s+(?!an?\s+hr)", "role hijack"),
     (r"act\s+as\s+(?!an?\s+hr)", "role hijack"),
     (r"pretend\s+(to\s+be|you\s+are)", "role hijack"),

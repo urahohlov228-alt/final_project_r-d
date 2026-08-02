@@ -13,7 +13,6 @@ import datetime
 import logging
 
 import httpx
-
 from mcp.server import MCPServer
 
 from ..config import Settings, get_settings

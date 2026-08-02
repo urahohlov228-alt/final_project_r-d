@@ -80,8 +80,17 @@ def _split_sections(body: str) -> list[tuple[str, str]]:
 
 
 def _split_long(content: str) -> list[str]:
-    """Split an oversized section on paragraph boundaries."""
-    paragraphs = content.split("\n\n")
+    """Split an oversized section on paragraph boundaries (word boundaries as
+    a last resort for single monster paragraphs)."""
+    paragraphs: list[str] = []
+    for para in content.split("\n\n"):
+        while len(para) > MAX_CHUNK_CHARS:  # no paragraph breaks — split on words
+            cut = para.rfind(" ", 0, MAX_CHUNK_CHARS)
+            cut = cut if cut > 0 else MAX_CHUNK_CHARS
+            paragraphs.append(para[:cut])
+            para = para[cut:].lstrip()
+        paragraphs.append(para)
+
     parts: list[str] = []
     buf = ""
     for para in paragraphs:
@@ -132,6 +141,8 @@ def chunk_markdown_file(path: Path) -> list[Chunk]:
             buf_text = ""
         if not buf_text:
             buf_section = section
+        elif not buf_section and section:
+            buf_section = section  # merged chunk inherits the first real heading
         buf_text = f"{buf_text}\n\n{content}".strip() if buf_text else content
     if buf_text:
         emit(buf_section, buf_text)
