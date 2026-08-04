@@ -1,6 +1,6 @@
 # HR Assistant — Multi-Agent MCP System with RAG
 
-[![CI](https://github.com/urahohlov228-alt/final_project_r-d/actions/workflows/ci.yml/badge.svg)](https://github.com/urahohlov228-alt/final_project_r-d/actions/workflows/ci.yml)
+[![CI](https://github.com/yuriiant-md/final_project_r-d/actions/workflows/ci.yml/badge.svg)](https://github.com/yuriiant-md/final_project_r-d/actions/workflows/ci.yml)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue)
 ![MCP](https://img.shields.io/badge/protocol-MCP-6c7cff)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
@@ -92,7 +92,7 @@ Prerequisites: Python 3.11+, ~1 GB of disk (embedding model), a free
 [Groq API key](https://console.groq.com/keys).
 
 ```bash
-git clone https://github.com/urahohlov228-alt/final_project_r-d.git
+git clone https://github.com/yuriiant-md/final_project_r-d.git
 cd final_project_r-d
 
 pip install -e ".[dev]"
