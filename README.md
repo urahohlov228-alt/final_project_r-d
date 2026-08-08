@@ -13,9 +13,6 @@ three specialist agents) talking to a single **MCP server** over the Model Conte
 
 Built with plain Python and a transparent agentic loop — no LangChain, no magic.
 
-> 🎬 **Demo video:** _[add your Loom/YouTube link here]_ · 📸 [Screenshots](docs/DEMO.md) ·
-> 🗺️ [Architecture](docs/ARCHITECTURE.md) · 📖 [Prompt Book](docs/PROMPTS.md)
-
 ![Chat UI](docs/img/ui-chat.png)
 
 ---
