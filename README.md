@@ -1,6 +1,6 @@
 # HR Assistant — Multi-Agent MCP System with RAG
 
-[![CI](https://github.com/yuriiant-md/final_project_r-d/actions/workflows/ci.yml/badge.svg)](https://github.com/yuriiant-md/final_project_r-d/actions/workflows/ci.yml)
+[![CI](https://github.com/yuriiant-md/HR-Assistant-Multi-Agent/actions/workflows/ci.yml/badge.svg)](https://github.com/yuriiant-md/HR-Assistant-Multi-Agent/actions/workflows/ci.yml)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue)
 ![MCP](https://img.shields.io/badge/protocol-MCP-6c7cff)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
@@ -89,8 +89,8 @@ Prerequisites: Python 3.11+, ~1 GB of disk (embedding model), a free
 [Groq API key](https://console.groq.com/keys).
 
 ```bash
-git clone https://github.com/yuriiant-md/final_project_r-d.git
-cd final_project_r-d
+git clone https://github.com/yuriiant-md/HR-Assistant-Multi-Agent.git
+cd HR-Assistant-Multi-Agent
 
 pip install -e ".[dev]"
 
@@ -129,7 +129,7 @@ The same six tools are exposed over stdio for any MCP host. Add to
     "hr-assistant": {
       "command": "python",
       "args": ["-m", "hr_assistant.mcp_server"],
-      "cwd": "/absolute/path/to/final_project_r-d",
+      "cwd": "/absolute/path/to/HR-Assistant-Multi-Agent",
       "env": { "PYTHONPATH": "src" }
     }
   }
