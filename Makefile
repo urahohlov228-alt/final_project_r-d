@@ -1,4 +1,4 @@
-.PHONY: install data run test lint docker docker-run mcp-stdio
+.PHONY: install data run test eval lint docker docker-run mcp-stdio
 
 install:            ## install the package with dev tools
 	pip install -e ".[dev]"
@@ -13,8 +13,11 @@ run:                ## start the app on http://localhost:8080
 test:               ## run the offline test suite
 	python -m pytest tests/ -q
 
+eval:               ## run quality evals (needs `make data`; LLM suites need LLM_API_KEY)
+	python -m evals
+
 lint:               ## ruff static checks
-	ruff check src tests scripts data
+	ruff check src tests scripts data evals
 
 docker:             ## build the production image
 	docker build -t hr-assistant .

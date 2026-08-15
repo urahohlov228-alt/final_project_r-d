@@ -1,0 +1,13 @@
+// Retrieval golden set: query -> handbook file(s) that should hold the answer.
+// `expected_sources` is a list; retrieving ANY of them within top_k counts as a hit.
+// Ground truth is by human judgement — if RAG misses, that is the signal to improve.
+{"query": "How much paid time off do I get each year?", "expected_sources": ["time-off-types.md", "time-off.md"]}
+{"query": "How do I get reimbursed for a business trip?", "expected_sources": ["spending-company-money.md"]}
+{"query": "What employee benefits does the company offer?", "expected_sources": ["benefits.md", "total-rewards.md"]}
+{"query": "Can I work remotely from another country?", "expected_sources": ["remote-work.md"]}
+{"query": "What happens during my first weeks of onboarding?", "expected_sources": ["onboarding.md"]}
+{"query": "What is the policy on harassment at work?", "expected_sources": ["anti-harassment.md"]}
+{"query": "How is my total compensation structured?", "expected_sources": ["total-rewards.md", "benefits.md"]}
+{"query": "How many sick days am I entitled to?", "expected_sources": ["time-off-types.md", "time-off.md"]}
+{"query": "Do I need manager approval for a long vacation?", "expected_sources": ["time-off-types.md", "time-off.md"]}
+{"query": "What are the guidelines for spending company money?", "expected_sources": ["spending-company-money.md"]}

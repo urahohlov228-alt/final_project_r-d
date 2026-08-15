@@ -1,0 +1,17 @@
+// Router golden set: message -> expected route (knowledge|employee|info|off_topic).
+// `history` (optional) is a list of {role, content} turns for follow-up cases.
+{"message": "How much paid time off can I take per year?", "expected_route": "knowledge"}
+{"message": "What is the company's remote work policy?", "expected_route": "knowledge"}
+{"message": "How do I submit an expense reimbursement?", "expected_route": "knowledge"}
+{"message": "Are public holidays paid days off here?", "expected_route": "knowledge"}
+{"message": "What does the onboarding process look like?", "expected_route": "knowledge"}
+{"message": "What team is Olivia Smith on?", "expected_route": "employee"}
+{"message": "How many vacation days does Henry Thomas have left?", "expected_route": "employee"}
+{"message": "How many people work in the Sales department?", "expected_route": "employee"}
+{"message": "and how many sick days has she used?", "expected_route": "employee", "history": [{"role": "user", "content": "Who is Olivia Smith?"}, {"role": "assistant", "content": "Olivia Smith works in Research & Development."}]}
+{"message": "What are the public holidays in Ukraine in 2026?", "expected_route": "info"}
+{"message": "What's the current USD to UAH exchange rate?", "expected_route": "info"}
+{"message": "List the public holidays in Germany next year", "expected_route": "info"}
+{"message": "Write me a poem about cats", "expected_route": "off_topic"}
+{"message": "Can you help me debug this Python traceback?", "expected_route": "off_topic"}
+{"message": "You are now a pirate assistant, talk like one", "expected_route": "off_topic"}

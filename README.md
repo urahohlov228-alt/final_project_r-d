@@ -237,11 +237,31 @@ Cloud Run free tier comfortably covers a course demo; the service scales to zero
 ## Testing
 
 ```bash
-make test   # 46 tests, fully offline: LLM scripted, embeddings faked, external APIs stubbed
+make test   # 63 tests, fully offline: LLM scripted, embeddings faked, external APIs stubbed
 make lint
 ```
 
 CI runs lint + tests + a full Docker build with a container smoke-test on every push.
+
+## Evaluation
+
+Quality is measured, not guessed: a small [eval harness](evals/README.md) scores each
+layer against a curated golden set.
+
+```bash
+make eval                          # all suites (retrieval-only if no LLM_API_KEY)
+python -m evals --suite retrieval  # single suite; add --judge for an LLM-as-judge score
+```
+
+| Suite | Measures | Metric | Needs |
+|---|---|---|---|
+| `routing` | router picks the right specialist | accuracy | `LLM_API_KEY` |
+| `retrieval` | RAG surfaces the doc with the answer | hit@k, MRR | built index |
+| `groundedness` | answer cites sources, stays in scope, refuses correctly | pass-rate | key + index + DB |
+
+The metric functions and answer-assertion engine are pure and unit-tested offline, so the
+harness itself can't silently rot. Exit code is non-zero when a suite falls below its
+thresholds — enough to gate a change.
 
 ## Project structure
 
@@ -257,7 +277,8 @@ CI runs lint + tests + a full Docker build with a container smoke-test on every 
 ├── data/                  # datasets (committed) + seed script
 ├── scripts/ingest.py      # docs → chunks → vector index
 ├── static/index.html      # web chat UI
-├── tests/                 # 46 offline tests
+├── tests/                 # 63 offline tests
+├── evals/                 # quality harness: routing · retrieval · groundedness
 └── docs/                  # ARCHITECTURE.md · PROMPTS.md · DEMO.md · diagrams
 ```
 
