@@ -20,7 +20,7 @@ jobs:
         run: pip install -e ".[dev]"
 
       - name: Lint (ruff)
-        run: ruff check src tests scripts data
+        run: ruff check src tests scripts data evals
 
       - name: Tests (offline — no API keys needed)
         run: python -m pytest tests/ -q

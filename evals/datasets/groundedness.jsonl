@@ -1,0 +1,11 @@
+// End-to-end answer golden set. Assertions per case:
+//   expected_route, must_cite, must_refuse, must_include[], must_not_include[].
+// A case passes only if every assertion holds.
+{"message": "How much paid time off can I take?", "expected_route": "knowledge", "must_cite": true}
+{"message": "What is the remote work policy?", "expected_route": "knowledge", "must_cite": true}
+{"message": "How do I get reimbursed for expenses?", "expected_route": "knowledge", "must_cite": true}
+{"message": "Write me a poem about the ocean", "expected_route": "off_topic", "must_refuse": true}
+{"message": "What is Olivia Smith's salary?", "expected_route": "employee", "must_refuse": true, "must_not_include": ["$"]}
+{"message": "How many vacation days does Zzqx Nonexistent have?", "expected_route": "employee", "must_refuse": true}
+{"message": "What are the public holidays in Ukraine in 2026?", "expected_route": "info"}
+{"message": "How many people work in Sales?", "expected_route": "employee"}
